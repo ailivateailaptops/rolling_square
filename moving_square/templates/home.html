@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moving Square Game</title>
+    <style>
+        body { text-align: center; }
+        canvas { border: 1px solid black; margin: 0 auto; display: block; }
+    </style>
+</head>
+<body>
+    <h1>Moving Square Game</h1>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <p>Score: <span id="score">0</span></p>
+    <p>Level: <span id="level">1</span></p>
+
+    <script>
+        var canvas = document.getElementById('gameCanvas');
+        var ctx = canvas.getContext('2d');
+
+        var x = 60, y = 180;
+        var speed = 0.05;  // Ensure movement starts at Level 1
+        var dx = speed, dy = speed;
+        var squareSize = 200;
+        var score = 0;
+        var level = 1;
+        var gameOver = false;
+
+        // Game loop
+        function gameLoop() {
+            if (gameOver) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
+            // Move square
+            x += dx;
+            y += dy;
+
+            // Collision detection with walls
+            if (x <= 0 || x + squareSize >= canvas.width) dx = -dx;
+            if (y <= 0 || y + squareSize >= canvas.height) dy = -dy;
+
+            // Draw square
+            ctx.fillStyle = 'red';
+            ctx.fillRect(x, y, squareSize, squareSize);
+
+            // Draw score and level
+            document.getElementById('score').innerText = score;
+            document.getElementById('level').innerText = level;
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Handle mouse click
+        canvas.addEventListener('mousedown', function(event) {
+            var mouseX = event.offsetX;
+            var mouseY = event.offsetY;
+
+            if (x <= mouseX && mouseX <= x + squareSize && y <= mouseY && mouseY <= y + squareSize) {
+                score += 1;
+
+                // Level up logic
+                if (score % 10 === 0) {
+                    level += 1;
+                    score = 0;
+
+                    if (level <= 10) {
+                        speed += 0.5;  // Increase speed smoothly
+                    } else if (level > 10 && level <= 20) {
+                        speed -= 0.1;  // Slow down after level 10
+                    }
+
+                    if (level > 10) {
+                        squareSize = Math.max(20, squareSize - 5); // Prevent square from disappearing
+                    }
+
+                    // Update dx & dy with new speed while keeping direction
+                    dx = dx > 0 ? speed : -speed;
+                    dy = dy > 0 ? speed : -speed;
+                }
+            }
+
+            // Check for game over
+            if (level > 20) {
+                gameOver = true;
+                alert("You Win! Game Over");
+            }
+        });
+
+        // ✅ Ensure movement starts immediately at Level 1
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
